@@ -24,7 +24,7 @@ class GPXParser extends Parser {
         // Create a new activity instance
         $activity = new Activity();
 
-        // Load the XML in the TCX file
+        // Load the XML in the GPX file
         $data = simplexml_load_file($pathname);
 
         if (!isset($data->trk)) {
@@ -49,6 +49,69 @@ class GPXParser extends Parser {
 
         // Finally return the activity object
         return $activity;
+    }
+
+    /**
+     * Parse a GPX file with multiple tracks
+     *
+     * @param      string     $pathname  The pathname
+     *
+     * @throws     Exception  invalid data
+     *
+     * @return     array      Array of Activity Objects
+     */
+    public function parseMultiple($pathname) {
+        // TODO: still WIP!
+
+        // Check that the file exists
+        $this->checkForFile($pathname);
+
+        // Load the XML in the GPX file
+        $data = simplexml_load_file($pathname);
+
+        if (!isset($data->{@attributes}) && !isset($data->trk) && !isset($data->wpt)) {
+            throw new Exception('Unable to find valid activity in file contents');
+        }
+
+        // According to specs, a GPX file can have from 0 to infinite number of tracks
+        $activities = [];
+        foreach ($data->trk as $activityNode) {
+            // Create a new activity instance
+            $activity = new Activity();
+            // Parse the activity
+            $firstTrackSegment = $activityNode->trkseg;
+            if ($firstTrackSegment) {
+                $firstTrackPoint = $firstTrackSegment->trkpt;
+                if ($firstTrackPoint) {
+                    $activity->setStartTime(new DateTime((string) $firstTrackPoint->time));
+                } else {
+                    continue;
+                }
+            } else {
+                continue;
+            }
+
+            $type = (string) $activityNode->type;
+            if (!$type) {
+                $type = (string) $activityNode->name[0];
+            }
+            $activity->setType($type);
+
+            // Now parse the trksegs (Track Segments)
+            foreach ($activityNode->trkseg as $lapNode) {
+                if (!$lapNode->trkpt) {
+                    // In some cases there can be an empty lap node
+                    continue;
+                }
+
+                $activity->addLap($this->parseLap($lapNode));
+            }
+
+            $activities[] = $activity;
+        }
+
+        // Finally return all activity objects
+        return $activities;
     }
 
     /**
@@ -104,7 +167,7 @@ class GPXParser extends Parser {
         $point->setPosition(['lat' => (float) $trackPointNode['lat'], 'lon' => (float) $trackPointNode['lon']]);
         $point->setAltitude((float) $trackPointNode->ele);
         $extensions = $trackPointNode->extensions;
-        if ($extensions){
+        if ($extensions) {
             $point->setHeartRate((float) $extensions->children('gpxtpx', true)->TrackPointExtension->hr);
         }
         // GPX files don't store the distance traveled, that will have to be calculated from lat/lon

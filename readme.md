@@ -13,7 +13,7 @@ Installation
 ```javascript
 {
     "require": {
-        "dominikstraub/waddle": "dev-master"
+        "trackmerger/waddle": "dev-master"
     }
 }
 ```

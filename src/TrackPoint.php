@@ -2,13 +2,14 @@
 
 namespace Waddle;
 
+use Cassandra\Date;
 use DateTime;
 use DateTimeZone;
 
 class TrackPoint {
     /** @var int Timestamp of the time this point was recorded (generally every second) */
     protected $time;
-    /** @var array Array [lat => float, long => float] */
+    /** @var array Array [lat => float, lon => float] */
     protected $position = [];
     /** @var float Altitude in metres */
     protected $altitude;
@@ -18,18 +19,22 @@ class TrackPoint {
     // Extensions that may or may not be present depending on device
     /** @var float Metres per second */
     protected $speed;
+    /** @var float Watts */
+    protected $watts;
     /** @var float Current heart rate */
     protected $heartRate;
     /** @var float Total calories burnt so far */
     protected $calories; //
+    /** @var float Current cadence */
+    protected $cadence; //
 
     /**
      * Get the timestamp in a given format
      * @param string $format
-     * @return string|int
+     * @return string|int|DateTime
      */
-    public function getTime($format) {
-        return $this->time instanceof DateTime ? $this->time->format($format) : $this->time;
+    public function getTime($format = null) {
+        return (!empty($format) && $this->time instanceof DateTime) ? $this->time->format($format) : $this->time;
     }
 
     /**
@@ -66,6 +71,14 @@ class TrackPoint {
     }
 
     /**
+     * Get the current watts at this point
+     * @return float
+     */
+    public function getWatts() {
+        return $this->watts;
+    }
+
+    /**
      * Get the current heart rate at this point
      * @return float
      */
@@ -79,6 +92,14 @@ class TrackPoint {
      */
     public function getCalories() {
         return $this->calories;
+    }
+
+    /**
+     * Get the current cadence
+     * @return float
+     */
+    public function getCadence() {
+        return $this->cadence;
     }
 
     /**
@@ -133,6 +154,16 @@ class TrackPoint {
     }
 
     /**
+     * Set the watts
+     * @param float $val
+     * @return $this
+     */
+    public function setWatts($val) {
+        $this->watts = $val;
+        return $this;
+    }
+
+    /**
      * Set the heart rate
      * @param float $val
      * @return $this
@@ -149,6 +180,16 @@ class TrackPoint {
      */
     public function setCalories($val) {
         $this->calories = $val;
+        return $this;
+    }
+
+    /**
+     * Set the current cadence
+     * @param float $val
+     * @return $this
+     */
+    public function setCadence($val) {
+        $this->cadence= $val;
         return $this;
     }
 }

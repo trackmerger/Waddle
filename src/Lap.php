@@ -64,6 +64,15 @@ class Lap {
     }
 
     /**
+     * @param array $trackPoints
+     * @return $this
+     */
+    public function setTrackPoints(array $trackPoints) {
+        $this->trackPoints = $trackPoints;
+        return $this;
+    }
+
+    /**
      * Set the total lap time (seconds)
      * @param int $val
      * @return $this

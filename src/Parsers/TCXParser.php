@@ -57,7 +57,7 @@ class TCXParser extends Parser {
     private function detectsNamespace(SimpleXMLElement $xml) {
         $this->nameNSActivityExtensionV2 = null;
 
-        $namespaces = $xml->getNamespaces(true);
+        $namespaces = $xml->getDocNamespaces(true);
         foreach ($namespaces as $name => $ns) {
             if ($ns === self::NS_ACTIVITY_EXTENSION_V2) {
                 $this->nameNSActivityExtensionV2 = $name;
@@ -102,9 +102,21 @@ class TCXParser extends Parser {
         $point->setAltitude((float) $trackPointNode->AltitudeMeters);
         $point->setDistance((float) $trackPointNode->DistanceMeters);
 
+        if (isset($trackPointNode->HeartRateBpm)) {
+            $point->setHeartRate((float) $trackPointNode->HeartRateBpm->Value);
+        }
+
+        if (isset($trackPointNode->Cadence)) {
+            $point->setCadence((float) $trackPointNode->Cadence);
+        }
+
         if ($this->nameNSActivityExtensionV2) {
-            if (isset($trackPointNode->Extensions->children('x', true)->TPX->children()->Speed)) {
-                $point->setSpeed((float) $trackPointNode->Extensions->children('x', true)->TPX->children()->Speed);
+            if (isset($trackPointNode->Extensions->TPX->Speed)) {
+                $point->setSpeed((float) $trackPointNode->Extensions->TPX->Speed);
+            }
+
+            if (isset($trackPointNode->Extensions->TPX->Watts)) {
+                $point->setWatts((float) $trackPointNode->Extensions->TPX->Watts);
             }
         }
 

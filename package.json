@@ -10,6 +10,11 @@
       "name": "Dominik Straub",
       "email": "dominik.straub@gmail.com",
       "url": ""
+    },
+    {
+      "name": "Alexander Reichardt",
+      "email": "alexander.reichardt@icloud.com",
+      "url": ""
     }
   ],
   "devDependencies": {
